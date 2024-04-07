@@ -38,6 +38,7 @@ def prepare_dirs(config):
                config.mdl_dir, config.model_dir
                ]:
     if not os.path.exists(path):
+      print(path)
       os.makedirs(path)
 
 def get_time():

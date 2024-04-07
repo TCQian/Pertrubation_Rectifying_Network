@@ -1,0 +1,10 @@
+Testcase_ID:A_L2_1
+bypass_prn:False, perturb_en:True, perturb_mode:0
+Data_dir:../data_dir/
+Pert_dir:../pert_test_dir/
+PRN_model:../models/generative_2017-11-11_00-29-01/model-inception.ckpt-1600
+                          
+                          [**] Average Fooling Rate is 	1.0
+                          [**] Average Benchmark Acc is 	0.0
+                          [**] Average PRN Accuracy is 	0.0
+                          

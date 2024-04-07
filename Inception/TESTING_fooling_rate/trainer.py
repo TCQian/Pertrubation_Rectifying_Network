@@ -104,7 +104,7 @@ class Trainer(object):
     file_content = tf.read_file(train_input_queue[0])
     #train_image = tf.image.decode_jpeg(file_content, channels=3)
     train_image = tf.image.decode_png(file_content, channels=3)
-    #train_image = tf.image.resize_images(train_image, [self.input_height, self.input_width])
+    train_image = tf.image.resize_images(train_image, [self.input_height, self.input_width])
     
     train_label = train_input_queue[1]
 
@@ -117,14 +117,14 @@ class Trainer(object):
                                         )
 
 
-    print "=input pipeline ready="
+    print("=input pipeline ready=")
 
     self.sess.run(tf.global_variables_initializer())
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord, sess=self.sess)   
 
     if self.pretrained_model:
-        print '[*] Loading pretrained model..'
+        print('[*] Loading pretrained model..')
         self.saver.restore(self.sess, self.pretrained_model)
 
 
@@ -176,13 +176,13 @@ class Trainer(object):
 
       if self.perturb_en:
         if self.perturb_mode == 0:
-          print '[*] Inputing pertrubed images'
+          print('[*] Inputing pertrubed images')
           for ix, one_img in enumerate(curr_img_batch_o):
             clipped_v = np.clip(undo_image_avg(curr_img_batch_o[ix,:,:,:]+v[0,:,:,:]), 0, 255) - np.clip(undo_image_avg(curr_img_batch_o[ix,:,:,:]), 0, 255)
             curr_img_batch_p[ix,:,:,:] = curr_img_batch_o[ix,:,:,:] + clipped_v[None, :, :, :]
 
         elif self.perturb_mode == 1:
-          print '[*] Inputing pertrubed & clean images'
+          print('[*] Inputing pertrubed & clean images')
           for ix, one_img in enumerate(curr_img_batch_o):
             if bool(random.getrandbits(1)):
               clipped_v = np.clip(undo_image_avg(curr_img_batch_o[ix,:,:,:]+v[0,:,:,:]), 0, 255) - np.clip(undo_image_avg(curr_img_batch_o[ix,:,:,:]), 0, 255)
@@ -190,7 +190,7 @@ class Trainer(object):
             else:
               curr_img_batch_p[ix,:,:,:] = curr_img_batch_o[ix,:,:,:]
       else:
-        print '[*] Inputing clean images'
+        print('[*] Inputing clean images')
         curr_img_batch_p = curr_img_batch_o
 
 
@@ -200,31 +200,34 @@ class Trainer(object):
         self.model.P_y: curr_lab_batch
       }
 
-      res = self.model.test_prn(self.sess, feed_dict, self._summary_writer, with_output=True)
+      res, output = self.model.test_prn(self.sess, feed_dict, self._summary_writer, with_output=True)
       self._summary_writer = self._get_summary_writer(res)
       #return res['test_acc']
-      return res
+      return res, output
 
     fooling_rate_list = []
     benchmark_acc_list = []
     prn_acc_list = []
+    output_list = []
     for step in trange(self.max_step, desc="Test prn"):
-      results = test_prn()
-      print '[*] folling rate is %f' % results['fooling_rate']
-      print '[*] benchmark acc is %f' % results['benchmark_acc']
-      print '[*] prn accuracy is %f' % results['prn_acc']
+      results, output = test_prn()
+      print('[*] folling rate is %f' % results['fooling_rate'])
+      print('[*] benchmark acc is %f' % results['benchmark_acc'])
+      print('[*] prn accuracy is %f' % results['prn_acc'])
 
       fooling_rate_list.append(results['fooling_rate'])
       benchmark_acc_list.append(results['benchmark_acc'])
       prn_acc_list.append(results['prn_acc'])
+      output_list.append(output)
 
     fooling_rate_arr = np.array(fooling_rate_list)
     benchmark_acc_arr = np.array(benchmark_acc_list)
     prn_acc_arr = np.array(prn_acc_list)
+    output_list = np.array(output_list)
 
-    print '[**] Average Fooling Rate is %f' % fooling_rate_arr.mean()
-    print '[**] Average Benchmark Accuracy is %f' % benchmark_acc_arr.mean()
-    print '[**] Average PRN Accuracy is %f' % prn_acc_arr.mean()
+    print('[**] Average Fooling Rate is %f' % fooling_rate_arr.mean())
+    print('[**] Average Benchmark Accuracy is %f' % benchmark_acc_arr.mean())
+    print('[**] Average PRN Accuracy is %f' % prn_acc_arr.mean())
 
 
     with open(self.test_log_file, 'w') as log_write_f:
@@ -239,6 +242,8 @@ class Trainer(object):
                          str(benchmark_acc_arr.mean()), \
                          str(prn_acc_arr.mean()) \
                        ))
+    with open(self.test_log_file[:-4] + ".npy", 'wb') as output_write_f:
+      np.save(output_write_f, output_list)
 
     #writer = tf.summary.FileWriter('dbg_logs', self.sess.graph)
     #writer.close()

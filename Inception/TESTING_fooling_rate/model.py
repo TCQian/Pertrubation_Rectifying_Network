@@ -102,10 +102,10 @@ class Model(object):
 
         if self.bypass_prn:
             tf.import_graph_def(graph_def, input_map={'input:0':self.P_x})
-            print '[*] PRN is bypassed !' 
+            print('[*] PRN is bypassed !' )
         else:
             tf.import_graph_def(graph_def, input_map={'input:0':self.R_x})
-            print '[*] PRN is enabled !' 
+            print('[*] PRN is enabled !' )
 
     self.K_y = sess.graph.get_tensor_by_name("import/softmax2_pre_activation:0")	# predicted label
 
@@ -196,7 +196,7 @@ class Model(object):
         fetch['output'] = output_op
 
       result = sess.run(fetch, feed_dict=feed_dict)
-      if result.has_key('summary'):
+      if 'summary' in result:
         summary_writer.add_summary(result['summary'], result['step'])
         summary_writer.flush()
       return result
@@ -211,23 +211,24 @@ class Model(object):
                      self.prn_summary, summary_writer,
                      output_op=self.R_x if with_output else None)
 
-    def test_prn(sess, feed_dict, summary_writer=None, with_output=False):
+    def test_prn(sess, feed_dict, summary_writer=None, with_output=True):
       fetch = {
           #'test_loss': self.prn_loss,
           'fooling_rate': self.fooling_rate,
           'benchmark_acc': self.benchmark_accuracy,
           'prn_acc': self.prn_accuracy,
           'step': self.prn_step,
+          'output': self.R_x if with_output else None,
       }
       
       if summary_writer is not None:
           fetch['summary'] = self.test_acc_summary
       
       result = sess.run(fetch, feed_dict=feed_dict)
-      if result.has_key('summary'):
+      if 'summary' in result:
           summary_writer.add_summary(result['summary'], result['step'])
           summary_writer.flush()
-      return result
+      return result, result['output']
 
     self.train_prn = train_prn
     self.test_prn = test_prn

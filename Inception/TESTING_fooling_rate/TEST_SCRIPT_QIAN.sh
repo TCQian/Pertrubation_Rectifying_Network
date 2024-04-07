@@ -1,0 +1,2 @@
+#bypass_prn=False, perturb_mode=0
+python main.py --testcase_ID=A_L2_1 --bypass_prn=False --perturb_en=True --perturb_mode=0  --data_dir="../data_dir/" --perturb_dir="" --pert_test_dir="../pert_test_dir/" --pretrained_model="../models/generative_2017-11-11_00-29-01/model-inception.ckpt-1600" --is_train=True --load_path="qian_testing"

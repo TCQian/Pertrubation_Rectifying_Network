@@ -120,14 +120,14 @@ class Trainer(object):
                                         )
 
 
-    print "=input pipeline ready="
+    print ("=input pipeline ready=")
 
     self.sess.run(tf.global_variables_initializer())
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord, sess=self.sess)   
 
     if self.pretrained_model:
-        print '[*] Loading pretrained model..'
+        print('[*] Loading pretrained model..')
         self.saver.restore(self.sess, self.pretrained_model)
 
 

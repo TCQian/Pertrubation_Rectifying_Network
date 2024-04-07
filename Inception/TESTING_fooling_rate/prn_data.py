@@ -81,8 +81,8 @@ def get_image_paths_and_labels_TEST(dataset):
     for i in range(len(dataset)):
         image_paths_ = dataset[i].image_paths
         sort_nicely(image_paths_)
-        image_paths_flat += image_paths_[40:50]
-        labels_flat += [i+1] * len(image_paths_[40:50])
+        image_paths_flat += image_paths_[0:10]
+        labels_flat += [i+1] * len(image_paths_[0:10])
     return image_paths_flat, labels_flat
 
 def get_image_paths_and_labels_TEST_2(dataset):
